@@ -12,12 +12,27 @@ __version__ = '0.0.2'
 
 def find_files_and_lines(old=None, new=None):
     import subprocess
-    p = subprocess.run('git diff -U0'.split(' '), stdout=subprocess.PIPE)
+    target = []
+    if old and new:
+        print('old and new')
+        target = ['{old}..{new}'.format(old=old, new=new)]
+    elif old:
+        print('old only')
+        target = [str(old)]
+    elif new:
+        print('new only')
+        raise ValueError('no clue how to do new only')
+    else:
+        print('no new no old')
+    subp = 'git diff -U0'.split(' ') + target
+    print(subp)
+
+    p = subprocess.run(subp, stdout=subprocess.PIPE)
     lines = [l for l in p.stdout.decode().splitlines() if l.startswith(('+++','@@'))]
     file_ = None
     chunks = []
     for atline in lines:
-        if(atline.startswith('+++ b')):
+        if(atline.startswith('+++ b') or atline == '+++ /dev/null'):
             if file_ is not None:
                 yield file_, chunks
             file_ = atline[5:]
@@ -39,8 +54,23 @@ def find_files_and_lines(old=None, new=None):
             raise ValueError('ubknown', atline)
     yield file_, chunks
 
-def run_on_cwd():
-    for fname, linespairs in find_files_and_lines():
+
+def main(argv=None):
+    import sys
+    if not argv:
+        argv = sys.argv
+    print('argv', argv)
+    if len(argv) > 2:
+        raise ValueError('too many arguments')
+    if len(argv) == 2:
+        run_on_cwd(argv[1])
+    else:
+        run_on_cwd()
+
+
+def run_on_cwd(old=None):
+
+    for fname, linespairs in find_files_and_lines(old=old):
         for start,stop in linespairs[::-1]:
             print(' '.join('autopep8 --in-place --line-range'.split()+[str(start),str(stop), '.{}'.format(fname)]))
             subprocess.run('autopep8 --in-place --line-range'.split()+[str(start),str(stop), '.{}'.format(fname)])

@@ -1,2 +1,3 @@
-from . import run_on_cwd
-run_on_cwd()
+from . import main
+import sys
+main(sys.argv)
