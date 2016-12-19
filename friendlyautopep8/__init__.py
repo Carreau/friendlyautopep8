@@ -71,6 +71,8 @@ def main(argv=None):
 def run_on_cwd(old=None):
 
     for fname, linespairs in find_files_and_lines(old=old):
+        if not fname.endswith('.py'):
+            continue
         for start,stop in linespairs[::-1]:
             print(' '.join('autopep8 --in-place --line-range'.split()+[str(start),str(stop), '.{}'.format(fname)]))
             subprocess.run('autopep8 --in-place --line-range'.split()+[str(start),str(stop), '.{}'.format(fname)])
