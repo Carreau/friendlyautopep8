@@ -10,17 +10,17 @@ __version__ = '0.0.2'
 
 
 
-def find_files_and_lines():
+def find_files_and_lines(old=None, new=None):
     import subprocess
     p = subprocess.run('git diff -U0'.split(' '), stdout=subprocess.PIPE)
     lines = [l for l in p.stdout.decode().splitlines() if l.startswith(('+++','@@'))]
-    file = None
+    file_ = None
     chunks = []
     for atline in lines:
         if(atline.startswith('+++ b')):
-            if file is not None:
-                yield file, chunks
-            file = atline[5:]
+            if file_ is not None:
+                yield file_, chunks
+            file_ = atline[5:]
             chunks = []
         elif atline.startswith('@@'):
             before, after = atline.split('@@')[1].strip().split(' ')
@@ -28,10 +28,16 @@ def find_files_and_lines():
                 start, delta = [int(_) for _ in after.split(',')]
             else:
                 start, delta = int(after), 1
+            if delta == 0:
+                print('skip only deleted lines')
+                continue 
+            beginning, end = (start, start+delta-1)
+            if end < beginning:
+                print("Wrong ordering, got", beginning, end, "extracted from", atline, )
             chunks.append((start, start+delta-1))
         else:
             raise ValueError('ubknown', atline)
-    yield file, chunks
+    yield file_, chunks
 
 def run_on_cwd():
     for fname, linespairs in find_files_and_lines():
