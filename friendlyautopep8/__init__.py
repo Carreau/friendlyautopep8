@@ -43,7 +43,7 @@ def find_files_and_lines(old=None, new=None):
             beginning, end = (start, start+delta-1)
             chunks.append((start, start+delta-1))
         else:
-            raise ValueError('ubknown', atline)
+            raise ValueError('unknown', atline)
     yield file_, chunks
 
 
