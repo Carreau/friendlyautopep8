@@ -4,6 +4,33 @@ A wrapper around [autopep8] which rums it only on non commited lines. I.E run
 `git-diff` between the worktree and this index and apply autopep8 only to
 there. 
 
+## Usage
+
+### Commandline:
+
+```
+$ friendlyautopep8
+skip only deleted lines
+autopep8 --in-place --line-range 23 38 ./friendlyautopep8/__init__.py
+autopep8 --in-place --line-range 11 19 ./friendlyautopep8/__init__.py
+```
+
+
+```
+$ friendlyautopep8 HEAD~13
+autopep8 --in-place --line-range 12 78 ./friendlyautopep8/__init__.py
+autopep8 --in-place --line-range 81 134 ./friendlyautopep8/__init__.py
+```
+
+### progrmatic:
+
+
+```python
+from friendlypep8 import run_on_cwd
+run_on_cwd(commmitish_or_None):
+```
+
+
 ## Why ?
 
 Because autopep8 is nice but ["There must be a better

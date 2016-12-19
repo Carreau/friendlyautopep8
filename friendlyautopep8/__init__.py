@@ -6,7 +6,7 @@ yet) lines of your files.
 
 import subprocess
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 
 
@@ -14,18 +14,12 @@ def find_files_and_lines(old=None, new=None):
     import subprocess
     target = []
     if old and new:
-        print('old and new')
         target = ['{old}..{new}'.format(old=old, new=new)]
     elif old:
-        print('old only')
         target = [str(old)]
     elif new:
-        print('new only')
         raise ValueError('no clue how to do new only')
-    else:
-        print('no new no old')
     subp = 'git diff -U0'.split(' ') + target
-    print(subp)
 
     p = subprocess.run(subp, stdout=subprocess.PIPE)
     lines = [l for l in p.stdout.decode().splitlines() if l.startswith(('+++','@@'))]
@@ -47,8 +41,6 @@ def find_files_and_lines(old=None, new=None):
                 print('skip only deleted lines')
                 continue 
             beginning, end = (start, start+delta-1)
-            if end < beginning:
-                print("Wrong ordering, got", beginning, end, "extracted from", atline, )
             chunks.append((start, start+delta-1))
         else:
             raise ValueError('ubknown', atline)
@@ -59,7 +51,6 @@ def main(argv=None):
     import sys
     if not argv:
         argv = sys.argv
-    print('argv', argv)
     if len(argv) > 2:
         raise ValueError('too many arguments')
     if len(argv) == 2:
