@@ -9,7 +9,6 @@ import subprocess
 __version__ = '0.0.3'
 
 
-
 def find_files_and_lines(old=None, new=None):
     import subprocess
     target = []
@@ -21,8 +20,10 @@ def find_files_and_lines(old=None, new=None):
         raise ValueError('no clue how to do new only')
     subp = 'git diff -U0'.split(' ') + target
 
-    p = subprocess.run(subp, stdout=subprocess.PIPE)
-    lines = [l for l in p.stdout.decode().splitlines() if l.startswith(('+++','@@'))]
+    p = subprocess.Popen(subp, stdout=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    lines = [l for l in stdout.decode().splitlines()
+             if l.startswith(('+++', '@@'))]
     file_ = None
     chunks = []
     for atline in lines:
@@ -40,7 +41,6 @@ def find_files_and_lines(old=None, new=None):
             if delta == 0:
                 print('skip only deleted lines')
                 continue 
-            beginning, end = (start, start+delta-1)
             chunks.append((start, start+delta-1))
         else:
             raise ValueError('ubknown', atline)
@@ -65,5 +65,8 @@ def run_on_cwd(old=None):
         if not fname.endswith('.py'):
             continue
         for start,stop in linespairs[::-1]:
-            print(' '.join('autopep8 --in-place --line-range'.split()+[str(start),str(stop), '.{}'.format(fname)]))
-            subprocess.run('autopep8 --in-place --line-range'.split()+[str(start),str(stop), '.{}'.format(fname)])
+            torun = 'autopep8 --in-place --line-range'.split() + \
+                [str(start), str(stop), '.{}'.format(fname)]
+            print(' '.join(torun))
+            p = subprocess.Popen(torun, stdout=subprocess.PIPE)
+            stdout, stderr = p.communicate()
