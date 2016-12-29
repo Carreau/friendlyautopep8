@@ -6,7 +6,7 @@ yet) lines of your files.
 
 import subprocess
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 
 def find_files_and_lines(old=None, new=None):
